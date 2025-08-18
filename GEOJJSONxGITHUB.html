@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tracking Kelengkapan Data Wilayah</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <style>
+    #map { height: 600px; }
+  </style>
+</head>
+<body>
+  <h2>Tracking Kelengkapan Data Provinsi</h2>
+  <div id="map"></div>
+
+  <script>
+    // -------- CONFIG --------
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQcRIOOAoGZEZsKjWkE8FY8v5qg7zoWjiEEvQqWyvBnASz3l5ETSBN7MusP9bZqwzvTKsQaX1tyhYIR/pub?gid=1745944621&single=true&output=csv";
+
+    // Daftar provinsi + link raw GitHub
+    const provinsiFiles = [
+      { provinsi: "Aceh", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Aceh.geojson" },
+      { provinsi: "Bali", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Bali.geojson" },
+      { provinsi: "Banten", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Banten.geojson" },
+      { provinsi: "Bengkulu", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Bengkulu.geojson" },
+      { provinsi: "DI Yogyakarta", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Daerah_Istimewa_Yogyakarta.geojson" },
+      { provinsi: "DKI Jakarta", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/DKI_Jakarta.geojson" },
+      { provinsi: "Gorontalo", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Gorontalo.geojson" },
+      { provinsi: "Jambi", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Jambi.geojson" },
+      { provinsi: "Jawa Barat", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Jawa_Barat.geojson" },
+      { provinsi: "Jawa Tengah", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Jawa_Tengah.geojson" },
+      { provinsi: "Jawa Timur", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Jawa_Timur.geojson" },
+      { provinsi: "Kalimantan Barat", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Kalimantan_Barat.geojson" },
+      { provinsi: "Kalimantan Selatan", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Kalimantan_Selatan.geojson" },
+      { provinsi: "Kalimantan Tengah", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Kalimantan_Tengah.geojson" },
+      { provinsi: "Kalimantan Timur", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Kalimantan_Timur.geojson" },
+      { provinsi: "Kalimantan Utara", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Kalimantan_Utara.geojson" },
+      { provinsi: "Bangka Belitung", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Kepulauan_Bangka_Belitung.geojson" },
+      { provinsi: "Kepulauan Riau", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Kepulauan_Riau.geojson" },
+      { provinsi: "Lampung", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Lampung.geojson" },
+      { provinsi: "Maluku Utara", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Maluku_Utara.geojson" },
+      { provinsi: "Maluku", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Maluku.geojson" },
+      { provinsi: "NTB", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Nusa_Tenggara_barat.geojson" },
+      { provinsi: "NTT", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Nusa_Tenggara_Timur.geojson" },
+      { provinsi: "Papua Barat Daya", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Papua_Barat_Daya.geojson" },
+      { provinsi: "Papua Barat", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Papua_Barat.geojson" },
+      { provinsi: "Papua Pegunungan", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Papua_Pegunungan.geojson" },
+      { provinsi: "Papua Selatan", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Papua_Selatan.geojson" },
+      { provinsi: "Papua Tengah", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Papua_Tengah.geojson" },
+      { provinsi: "Papua", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Papua.geojson" },
+      { provinsi: "Riau", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Riau.geojson" },
+      { provinsi: "Sulawesi Barat", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Sulawesi_Barat.geojson" },
+      { provinsi: "Sulawesi Selatan", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Sulawesi_Selatan.geojson" },
+      { provinsi: "Sulawesi Tengah", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Sulawesi_Tengah.geojson" },
+      { provinsi: "Sulawesi Tenggara", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Sulawesi_Tenggara.geojson" },
+      { provinsi: "Sulawesi Utara", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Sulawesi_Utara.geojson" },
+      { provinsi: "Sumatera Barat", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Sumatera_Barat.geojson" },
+      { provinsi: "Sumatera Selatan", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Sumatera_Selatan.geojson" },
+      { provinsi: "Sumatera Utara", url: "https://raw.githubusercontent.com/GhozaliU/Project_Bangda_fix2.0/main/Sumatera_Utara.geojson" }
+    ];
+
+    // -------- Inisialisasi Map --------
+    const map = L.map('map').setView([-2, 118], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+// -------- Ambil Progress dari Google Sheets --------
+let progressData = {};
+fetch(SHEET_CSV_URL)
+  .then(res => res.text())
+  .then(csvText => {
+    const rows = csvText.split("\n").map(r => r.split(","));
+    const header = rows[0].map(h => h.trim());
+    rows.slice(1).forEach(r => {
+      const obj = {};
+      header.forEach((h, i) => obj[h] = r[i]);
+      progressData[obj["Nama Provinsi"]] = obj["Progress"];
+    });
+
+    // Setelah progress siap, fetch semua GeoJSON
+    loadAllGeoJSON();
+  })
+  .catch(err => console.error("Gagal fetch Sheet:", err));
+
+// -------- Fungsi Load GeoJSON --------
+let geojsonLayerGroup = L.layerGroup().addTo(map);
+
+function loadAllGeoJSON() {
+  // Hapus layer lama sebelum menggambar ulang
+  geojsonLayerGroup.clearLayers(); // buang layer lama
+
+  provinsiFiles.forEach(f => {
+    fetch(f.url)
+      .then(res => res.json())
+      .then(data => {
+        const layer = L.geoJSON(data, {
+          style: (feature) => {
+            const provName = (feature.properties.Provinsi || feature.properties.provinsi || f.provinsi).trim();
+            const status = progressData[provName] || "Belum";
+
+            return {
+              color: "black", // outline
+              weight: 1,
+              fillColor: status === "Selesai" ? "green" :
+                         status === "Belum" ? "red" : 
+                         status === "Progress" ? "orange" : "white",
+              fillOpacity: 1
+            };
+          },
+          onEachFeature: (feature, layer) => {
+            const provName = (feature.properties.Provinsi || feature.properties.provinsi || f.provinsi).trim();
+            const status = progressData[provName] || "Tidak ada data";
+            layer.bindPopup(`<b>${provName}</b><br>Status: ${status}`);
+          }
+        });
+
+        geojsonLayerGroup.addLayer(layer);
+      })
+      .catch(err => console.error("Error load GeoJSON:", err));
+  });
+}
+
+// -------- Tambah Legenda --------
+const legend = L.control({ position: "bottomleft" });
+
+legend.onAdd = function () {
+  const div = L.DomUtil.create("div", "info legend");
+  const statuses = ["Belum", "Progress", "Selesai"];
+  const colors = {
+    "Belum": "red",
+    "Progress": "orange",
+    "Selesai": "green"
+  };
+
+  div.innerHTML += "<h4>Status</h4>";
+  statuses.forEach(s => {
+    div.innerHTML +=
+      '<i style="background:' + colors[s] + '; width:18px; height:18px; float:left; margin-right:8px; opacity:0.7;"></i> ' +
+      s + "<br>";
+  });
+  return div;
+};
+
+legend.addTo(map);
+
+  </script>
+</body>
+</html>
