@@ -105,8 +105,10 @@ function loadAllGeoJSON() {
               color: "black", // outline
               weight: 1,
               fillColor: status === "Selesai" ? "green" :
-                         status === "Belum" ? "red" : 
-                         status === "Progress" ? "orange" : "white",
+                         status === "Penyusunan" ? "red" : 
+                         status === "Linsek" ? "orange" : 
+                         status === "Persub" ? "yellow" : "#80ff00",
+//                         status === "Permohonan Evaluasi/Konsultasi" ? "orange" : "white",
               fillOpacity: 1
             };
           },
@@ -128,10 +130,12 @@ const legend = L.control({ position: "bottomleft" });
 
 legend.onAdd = function () {
   const div = L.DomUtil.create("div", "info legend");
-  const statuses = ["Belum", "Progress", "Selesai"];
+  const statuses = ["Penyusunan", "Linsek", "Persub", "Permohonan Evaluasi/Konsultasi", "Selesai"];
   const colors = {
-    "Belum": "red",
-    "Progress": "orange",
+    "Penyusunan": "red",
+    "Linsek": "orange",
+    "Persub": "yellow",
+    "Permohonan Evaluasi/Konsultasi" : "#80ff00",
     "Selesai": "green"
   };
 
