@@ -130,7 +130,7 @@ const legend = L.control({ position: "bottomleft" });
 
 legend.onAdd = function () {
   const div = L.DomUtil.create("div", "info legend");
-  const statuses = ["Penyusunan", "Linsek", "Persub", "Permohonan Evaluasi/Konsultasi", "Selesai"];
+  const statuses = ["Penyusunan", "Linsek", "Persub", "Permohonan Evaluasi/Konsultasi", "Perda"];
   const colors = {
     "Penyusunan": "red",
     "Linsek": "orange",
@@ -153,4 +153,5 @@ legend.addTo(map);
   </script>
 </body>
 </html>
+
 
