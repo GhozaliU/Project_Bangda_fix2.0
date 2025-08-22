@@ -106,7 +106,7 @@ function loadAllGeoJSON() {
               weight: 1,
               fillColor: status === "Perda" ? "#00FF00" :
                          status === "Penyusunan" ? "#FF0000" : 
-                         status === "Linsek" ? "FF6B5E" : 
+                         status === "Linsek" ? "#FF6B5E" : 
                          status === "Persub" ? "#C8FFB3" : "#95FF66",
 //                         status === "Permohonan Evaluasi/Konsultasi" ? "orange" : "white",
               fillOpacity: 1
@@ -133,7 +133,7 @@ legend.onAdd = function () {
   const statuses = ["Penyusunan", "Linsek", "Persub", "Permohonan Evaluasi/Konsultasi", "Perda"];
   const colors = {
     "Penyusunan": "#FF0000",
-    "Linsek": "FF6B5E",
+    "Linsek": "#FF6B5E",
     "Persub": "#C8FFB3",
     "Permohonan Evaluasi/Konsultasi" : "#95FF66",
     "Perda": "#00FF00"
@@ -153,5 +153,6 @@ legend.addTo(map);
   </script>
 </body>
 </html>
+
 
 
