@@ -77,8 +77,8 @@ fetch(SHEET_CSV_URL)
     rows.slice(1).forEach(r => {
       const obj = {};
       header.forEach((h, i) => obj[h] = r[i]);
-      progressData[obj["Nama Provinsi"]] = obj["Progress"];
-       progressData[obj["Nama Provinsi"]] = {
+      //progressData[obj["Nama Provinsi"]] = obj["Progress"];
+      progressData[obj["Nama Provinsi"]] = {
             Progress: obj["Progress"],
             ForumLinsek: obj["Forum Linsek"],
             Persub: obj["Persub"],
@@ -162,6 +162,7 @@ legend.addTo(map);
   </script>
 </body>
 </html>
+
 
 
 
