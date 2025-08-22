@@ -104,10 +104,10 @@ function loadAllGeoJSON() {
             return {
               color: "black", // outline
               weight: 1,
-              fillColor: status === "Perda" ? "green" :
-                         status === "Penyusunan" ? "red" : 
-                         status === "Linsek" ? "orange" : 
-                         status === "Persub" ? "yellow" : "#80ff00",
+              fillColor: status === "Perda" ? "#00FF00" :
+                         status === "Penyusunan" ? "#FF0000" : 
+                         status === "Linsek" ? "FF6B5E" : 
+                         status === "Persub" ? "#C8FFB3" : "#95FF66",
 //                         status === "Permohonan Evaluasi/Konsultasi" ? "orange" : "white",
               fillOpacity: 1
             };
@@ -132,11 +132,11 @@ legend.onAdd = function () {
   const div = L.DomUtil.create("div", "info legend");
   const statuses = ["Penyusunan", "Linsek", "Persub", "Permohonan Evaluasi/Konsultasi", "Perda"];
   const colors = {
-    "Penyusunan": "red",
-    "Linsek": "orange",
-    "Persub": "yellow",
-    "Permohonan Evaluasi/Konsultasi" : "#80ff00",
-    "Perda": "green"
+    "Penyusunan": "#FF0000",
+    "Linsek": "FF6B5E",
+    "Persub": "#C8FFB3",
+    "Permohonan Evaluasi/Konsultasi" : "#95FF66",
+    "Perda": "#00FF00"
   };
 
   div.innerHTML += "<h4>Status</h4>";
