@@ -78,14 +78,14 @@ fetch(SHEET_CSV_URL)
       const obj = {};
       header.forEach((h, i) => obj[h] = r[i]);
       //progressData[obj["Nama Provinsi"]] = obj["Progress"];
-      progressData[obj["Nama Provinsi"]] = {
-            Progress: obj["Progress"],
-            ForumLinsek: obj["Forum Linsek"],
-            Persub: obj["Persub"],
-            PersetujuanDPRD: obj["Persetujuan DPRD"],
-            PermohonanEvaluasi: obj["Permohonan Evaluasi"],
-            Perda: obj["Perda"]
-          };
+      progressData[obj["Nama Provinsi"]] = {};
+      progressData[obj["Nama Provinsi"]]["Progress"] = obj["Progress"];
+      progressData[obj["Nama Provinsi"]]["Forum Linsek"] = obj["Forum Linsek"];
+      progressData[obj["Nama Provinsi"]]["Persub"] = obj["Persub"];
+      progressData[obj["Nama Provinsi"]]["Persetujuan DPRD"] = obj["Persetujuan DPRD"];
+      progressData[obj["Nama Provinsi"]]["Permohonan Evaluasi"] = obj["Permohonan Evaluasi"];
+      progressData[obj["Nama Provinsi"]]["Perda"] = obj["Perda"];
+
         });
     });
 
@@ -162,6 +162,7 @@ legend.addTo(map);
   </script>
 </body>
 </html>
+
 
 
 
