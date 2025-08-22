@@ -8,6 +8,13 @@
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
   <style>
     #map { height: 600px; }
+    .info.legend {
+      background: white;
+      padding: 8px;
+      font: 15px/1.4 Arial, sans-serif;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
@@ -67,104 +74,112 @@
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-// -------- Ambil Progress dari Google Sheets --------
-let progressData = {};
-fetch(SHEET_CSV_URL)
-  .then(res => res.text())
-  .then(csvText => {
-    const rows = csvText.split("\n").map(r => r.split(","));
-    const header = rows[0].map(h => h.trim());
-    rows.slice(1).forEach(r => {
-      const obj = {};
-      header.forEach((h, i) => obj[h] = r[i]);
-      //progressData[obj["Nama Provinsi"]] = obj["Progress"];
-      progressData[obj["Nama Provinsi"]] = {};
-      progressData[obj["Nama Provinsi"]]["Progress"] = obj["Progress"];
-      progressData[obj["Nama Provinsi"]]["Forum Linsek"] = obj["Forum Linsek"];
-      progressData[obj["Nama Provinsi"]]["Persub"] = obj["Persub"];
-      progressData[obj["Nama Provinsi"]]["Persetujuan DPRD"] = obj["Persetujuan DPRD"];
-      progressData[obj["Nama Provinsi"]]["Permohonan Evaluasi"] = obj["Permohonan Evaluasi"];
-      progressData[obj["Nama Provinsi"]]["Perda"] = obj["Perda"];
+    // -------- Ambil Data Progress dari Google Sheets --------
+    let progressData = {};
+    fetch(SHEET_CSV_URL)
+      .then(res => res.text())
+      .then(csvText => {
+        const rows = csvText.split("\n").map(r => r.split(","));
+        const header = rows[0].map(h => h.trim());
+        rows.slice(1).forEach(r => {
+          const obj = {};
+          header.forEach((h, i) => obj[h] = r[i]);
 
-        });
-    });
-
-    // Setelah progress siap, fetch semua GeoJSON
-    loadAllGeoJSON();
-  })
-  .catch(err => console.error("Gagal fetch Sheet:", err));
-
-// -------- Fungsi Load GeoJSON --------
-let geojsonLayerGroup = L.layerGroup().addTo(map);
-
-function loadAllGeoJSON() {
-  // Hapus layer lama sebelum menggambar ulang
-  geojsonLayerGroup.clearLayers(); // buang layer lama
-
-  provinsiFiles.forEach(f => {
-    fetch(f.url)
-      .then(res => res.json())
-      .then(data => {
-        const layer = L.geoJSON(data, {
-          style: (feature) => {
-            const provName = (feature.properties.Provinsi || feature.properties.provinsi || f.provinsi).trim();
-            const status = progressData[provName] || "Belum";
-
-            return {
-              color: "black", // outline
-              weight: 1,
-              fillColor: status === "Perda" ? "#00FF00" :
-                         status === "Penyusunan" ? "#FF0000" : 
-                         status === "Linsek" ? "#FF6B5E" : 
-                         status === "Persub" ? "#C8FFB3" : "#95FF66",
-//                         status === "Permohonan Evaluasi/Konsultasi" ? "orange" : "white",
-              fillOpacity: 1
-            };
-          },
-          onEachFeature: (feature, layer) => {
-            const provName = (feature.properties.Provinsi || feature.properties.provinsi || f.provinsi).trim();
-            const status = progressData[provName] || "Tidak ada data";
-            layer.bindPopup(`<b>${provName}</b><br>Status: ${status}`);
-          }
+          progressData[obj["Nama Provinsi"]] = {
+            progress: obj["Progress"],   // untuk pewarnaan
+            status: {                    // detail status lain
+              "Forum Linsek": obj["Forum Linsek"],
+              "Persub": obj["Persub"],
+              "Persetujuan DPRD": obj["Persetujuan DPRD"],
+              "Permohonan Evaluasi": obj["Permohonan Evaluasi"],
+              "Perda": obj["Perda"]
+            }
+          };
         });
 
-        geojsonLayerGroup.addLayer(layer);
+        // Setelah data siap, load semua GeoJSON
+        loadAllGeoJSON();
       })
-      .catch(err => console.error("Error load GeoJSON:", err));
-  });
-}
+      .catch(err => console.error("Gagal fetch Sheet:", err));
 
-// -------- Tambah Legenda --------
-const legend = L.control({ position: "bottomleft" });
+    // -------- Fungsi Load GeoJSON --------
+    let geojsonLayerGroup = L.layerGroup().addTo(map);
 
-legend.onAdd = function () {
-  const div = L.DomUtil.create("div", "info legend");
-  const statuses = ["Penyusunan", "Linsek", "Persub", "Permohonan Evaluasi/Konsultasi", "Perda"];
-  const colors = {
-    "Penyusunan": "#FF0000",
-    "Linsek": "#FF6B5E",
-    "Persub": "#C8FFB3",
-    "Permohonan Evaluasi/Konsultasi" : "#95FF66",
-    "Perda": "#00FF00"
-  };
+    function loadAllGeoJSON() {
+      geojsonLayerGroup.clearLayers();
 
-  div.innerHTML += "<h4>Status</h4>";
-  statuses.forEach(s => {
-    div.innerHTML +=
-      '<i style="background:' + colors[s] + '; width:18px; height:18px; float:left; margin-right:8px; opacity:0.7;"></i> ' +
-      s + "<br>";
-  });
-  return div;
-};
+      provinsiFiles.forEach(f => {
+        fetch(f.url)
+          .then(res => res.json())
+          .then(data => {
+            const layer = L.geoJSON(data, {
+              style: (feature) => {
+                const provName = (feature.properties.Provinsi || feature.properties.provinsi || f.provinsi).trim();
+                const dataProv = progressData[provName];
+                const status = dataProv ? dataProv.progress : "Belum";
 
-legend.addTo(map);
+                return {
+                  color: "black",
+                  weight: 1,
+                  fillColor: status === "Perda" ? "#006602" :
+                             status === "Penyusunan" ? "#ff7900" :
+                             status === "Linsek" ? "#ffe400":
+                             status === "Persub" ? "#beff00" :
+                             status === "Permen ATR" ? "#a700ff" :
+                             status === "Peninjauan Kembali" ? "#ff0000":
+                             status === "Permohonan Evaluasi/Konsultasi" ? "#36ff00" : "white",
+                  fillOpacity: 1
+                };
+              },
+              onEachFeature: (feature, layer) => {
+                const provName = (feature.properties.Provinsi || feature.properties.provinsi || f.provinsi).trim();
+                const dataProv = progressData[provName];
 
+                if (dataProv) {
+                  let popupHtml = `<b>${provName}</b><br>`;
+                  popupHtml += `<b>Progress:</b> ${dataProv.progress}<br>`;
+                  for (const [key, val] of Object.entries(dataProv.status)) {
+                    popupHtml += `<b>${key}:</b> ${val}<br>`;
+                  }
+                  layer.bindPopup(popupHtml);
+                } else {
+                  layer.bindPopup(`<b>${provName}</b><br>Tidak ada data`);
+                }
+              }
+            });
+
+            geojsonLayerGroup.addLayer(layer);
+          })
+          .catch(err => console.error("Error load GeoJSON:", err));
+      });
+    }
+
+    // -------- Tambah Legenda --------
+    const legend = L.control({ position: "bottomleft" });
+
+    legend.onAdd = function () {
+      const div = L.DomUtil.create("div", "info legend");
+      const statuses = ["Peninjauan Kembali", "Penyusunan", "Linsek", "Persub", "Permohonan Evaluasi/Konsultasi", "Perda", "Permen ATR"];
+      const colors = {
+        "Peninjauan Kembali": "#ff0000",
+        "Penyusunan": "#ff7900",
+        "Linsek": "#ffe400",
+        "Persub": "#beff00",
+        "Permohonan Evaluasi/Konsultasi": "#36ff00",
+        "Perda": "#006602",
+        "Permen ATR": "#a700ff"
+      };
+
+      div.innerHTML += "<h4>Status</h4>";
+      statuses.forEach(s => {
+        div.innerHTML +=
+          '<i style="background:' + colors[s] + '; width:18px; height:18px; float:left; margin-right:8px; opacity:0.7;"></i> ' +
+          s + "<br>";
+      });
+      return div;
+    };
+
+    legend.addTo(map);
   </script>
 </body>
 </html>
-
-
-
-
-
-
